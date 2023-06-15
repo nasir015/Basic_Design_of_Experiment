@@ -1,61 +1,64 @@
 ### Here's an explanation of the code of Question Number 01:
 
-### 1. Importing the required libraries:
+Let's go through the code step by step:
+
 ```python
-import random
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
 ```
-The code imports the necessary libraries: `random`, `numpy`, `pandas`, and `scipy.stats`.
+These lines import the necessary libraries for the code: NumPy for numerical operations, pandas for data manipulation and analysis, and scipy.stats for statistical calculations.
 
-### 2. Generating random data for illustration purposes:
 ```python
-random.seed(2015015)
-random_number = np.random.randint(0, 100, 200)
+np.random.seed(2015015)
 ```
-The random seed is set to `2015015`, ensuring consistent random number generation. The `np.random.randint` function generates an array `random_number` containing 200 random integers between 0 (inclusive) and 100 (exclusive).
+This sets the seed for the random number generator in NumPy. Setting a seed ensures that the generated random numbers are reproducible.
 
-### 3. Creating a Latin square design:
 ```python
-treatments = ['A', 'B', 'C']
-latin_square = np.array([
+methods = ['A', 'B', 'C']
+time_periods = ['T1', 'T2', 'T3']
+students = ['S1', 'S2', 'S3']
+```
+These lines define lists for the teaching methods, time periods, and students involved in the study.
+
+```python
+design_matrix = np.array([
     ['A', 'B', 'C'],
     ['B', 'C', 'A'],
     ['C', 'A', 'B']
 ])
 ```
-The code defines an array `treatments` containing the treatment labels 'A', 'B', and 'C'. The Latin square design is represented by the 2D NumPy array `latin_square`, where each row represents a plot and each column represents a treatment. This Latin square design ensures that each treatment appears once in each row and column.
+This creates a Latin Square design matrix using NumPy. The design matrix assigns each teaching method to each time period and each student in a balanced way, ensuring that each method appears once in each time period and for each student.
 
-### 4. Generating random growth rate data:
 ```python
-num_plots = 9
-growth_rates = [random.uniform(0, 1) for _ in range(num_plots)]
+data = pd.DataFrame(index=students, columns=time_periods)
 ```
-The code generates a list `growth_rates` containing 9 random growth rate values between 0 and 1 for each plot. The `random.uniform` function from the `random` module is used to generate random floating-point numbers.
+This creates an empty pandas DataFrame called `data` to store the scores. The DataFrame has the students as row labels and the time periods as column labels.
 
-### 5. Creating a pandas DataFrame with the data:
 ```python
-data = pd.DataFrame({'Plot': range(1, num_plots + 1),
-                     'Fertilizer': latin_square.flatten(),
-                     'GrowthRate': growth_rates})
+for i, student in enumerate(students):
+    for j, time_period in enumerate(time_periods):
+        teaching_method = design_matrix[i, j]
+        score = np.random.randint(0, 101)  # Random score between 0 and 100
+        data.loc[student, time_period] = score
 ```
-The code creates a pandas DataFrame `data` with three columns: 'Plot', 'Fertilizer', and 'GrowthRate'. The 'Plot' column contains the plot numbers, the 'Fertilizer' column contains the treatment labels from the Latin square design (flattened into a 1D array), and the 'GrowthRate' column contains the corresponding random growth rate values.
+These nested loops iterate over each student and time period. The `enumerate()` function is used to access the index and value of each student and time period. The teaching method is obtained from the corresponding position in the design matrix. Random scores between 0 and 100 are generated using `np.random.randint()` and assigned to the corresponding student and time period in the `data` DataFrame.
 
-### 6. Analyzing the data:
 ```python
-group_means = data.groupby('Fertilizer')['GrowthRate'].mean()
-anova_result = stats.f_oneway(*[data[data['Fertilizer'] == t]['GrowthRate'] for t in treatments])
+print(data)
 ```
-The code performs the analysis of the data. It calculates the group means by grouping the data by the 'Fertilizer' column and calculating the mean of the 'GrowthRate' column for each group using the `groupby` method from pandas. The ANOVA is then performed using the `f_oneway` function from the `scipy.stats` module. It takes the growth rate data for each treatment group as input.
+This prints the populated `data` DataFrame, displaying the random scores for each student and time period.
 
-### 7. Printing the group means and ANOVA result:
 ```python
-print("Group Means:")
-print(group_means)
-
-print("\nANOVA Result:")
-print("F-value:", anova_result.statistic)
-print("p-value:", anova_result.pvalue)
+f_value, p_value = stats.f_oneway(data['T1'], data['T2'], data['T3'])
 ```
-The code prints the group means and ANOVA result to the console. The group means represent the average growth rate for each treatment group. The ANOVA result includes the F-value, which measures the ratio of between-group variance to within-group variance, and the p-value, which indicates the statistical significance of the F-value.
+This line performs a one-way ANOVA using the `f_oneway()` function from `scipy.stats`. The ANOVA is applied to the scores in each time period (`T1`, `T2`, and `T3`) in the `data` DataFrame.
+
+```python
+print("\nOne-way ANOVA results:")
+print("F-value:", f_value)
+print("p-value:", p_value)
+```
+These lines print the results of the one-way ANOVA. The F-value and p-value are displayed, providing information about the statistical significance of the observed differences in the scores between the time periods.
+
+Overall, the code sets up a Latin Square Design, generates random scores, and performs a one-way ANOVA to analyze the significance of the observed differences in student performance across different teaching methods and time periods.
